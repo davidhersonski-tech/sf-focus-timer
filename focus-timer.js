@@ -1,9 +1,9 @@
 javascript:(() => {
     "use strict";
 
-    const ID = "sf-kadjan-bot";
+    const ID = "sf-demo-assistant";
 
-    // Zweiter Klick auf die Schnellaktion: Chat schließen
+    // Zweiter Klick auf die Schnellaktion schließt den Chat
     const existing = document.getElementById(ID);
 
     if (existing) {
@@ -22,21 +22,17 @@ javascript:(() => {
         position: "fixed",
         right: "24px",
         bottom: "24px",
-        width: "360px",
-        height: "500px",
+        width: "380px",
+        height: "520px",
         zIndex: "2147483647",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-
         background: "#ffffff",
         color: "#1d2d3e",
-
         borderRadius: "14px",
         boxShadow: "0 10px 35px rgba(0,0,0,.28)",
-
-        fontFamily:
-            '"72", "Segoe UI", Arial, sans-serif'
+        fontFamily: '"72", "Segoe UI", Arial, sans-serif'
     });
 
     // =========================================================
@@ -100,7 +96,7 @@ javascript:(() => {
     );
 
     // =========================================================
-    // NACHRICHTEN
+    // NACHRICHTENBEREICH
     // =========================================================
 
     const messages = document.createElement("div");
@@ -119,7 +115,7 @@ javascript:(() => {
     // NACHRICHT ERSTELLEN
     // =========================================================
 
-    function addMessage(text, sender) {
+    function addMessage(content, sender) {
 
         const wrapper =
             document.createElement("div");
@@ -135,11 +131,10 @@ javascript:(() => {
         const bubble =
             document.createElement("div");
 
-        bubble.textContent = text;
-
         Object.assign(bubble.style, {
-            maxWidth: "78%",
-            padding: "9px 12px",
+            maxWidth: "80%",
+            padding: "10px 13px",
+
             borderRadius:
                 sender === "user"
                     ? "14px 14px 3px 14px"
@@ -161,8 +156,18 @@ javascript:(() => {
                     : "0 1px 4px rgba(0,0,0,.12)",
 
             fontSize: "14px",
-            lineHeight: "1.4"
+            lineHeight: "1.5",
+            whiteSpace: "pre-line"
         });
+
+        if (typeof content === "string") {
+
+            bubble.textContent = content;
+
+        } else {
+
+            bubble.appendChild(content);
+        }
 
         wrapper.appendChild(bubble);
         messages.appendChild(wrapper);
@@ -174,13 +179,99 @@ javascript:(() => {
     }
 
     // =========================================================
-    // BEGRÜSSUNG
+    // STARTNACHRICHT
     // =========================================================
 
     addMessage(
-        "Hallo! 👋 Ich bin Ihr virtueller SF Assistant. Wie kann ich Ihnen helfen?",
+        "Hallo! 👋 Ich bin Ihr virtueller SF Assistant.\n\nWie kann ich Ihnen helfen?",
         "bot"
     );
+
+    // =========================================================
+    // VORBEREITETE DEMO-ANTWORTEN
+    // =========================================================
+
+    let responseIndex = 0;
+
+    const responses = [
+
+        // -----------------------------------------------------
+        // ANTWORT 1
+        // -----------------------------------------------------
+
+        () => {
+            return (
+                'Die Startseite kannst du bearbeiten, indem du in der Aktionsleiste „Startseite verwalten“ auswählst.\n\n' +
+                'Dort kannst du Banner, Schnellaktionen und Karten erstellen oder anpassen.\n\n' +
+                'Möchtest du zu einem davon mehr wissen?'
+            );
+        },
+
+        // -----------------------------------------------------
+        // ANTWORT 2
+        // -----------------------------------------------------
+
+        () => {
+            return (
+                'Schnellaktionen sind die bunten Kästchen auf der Startseite unter dem Banner, wie z. B. „Mein Profil anzeigen“ oder „Erinnerungen anzeigen“.\n\n' +
+                'Davon sind maximal 16 gleichzeitig sichtbar und du kannst bis zu 5 eigene Schnellaktionen erstellen.'
+            );
+        },
+
+        // -----------------------------------------------------
+        // ANTWORT 3
+        // -----------------------------------------------------
+
+        () => {
+
+            const container =
+                document.createElement("div");
+
+            const text =
+                document.createElement("div");
+
+            text.textContent =
+                "Lorna Okomato ist zum Beispiel Recruiterin.";
+
+            const link =
+                document.createElement("a");
+
+            link.textContent =
+                "Profil von Lorna Okomato öffnen";
+
+            link.href =
+                "https://hcm-us10-sales.hr.cloud.sap/sf/liveprofile?selected_user_encoded=7F77B0625BA343408823C8AAF2DA04E3&_s.crb=56P8gaR4Ki1NmGuJTQO12BezuBOLJCEzgR8YzCWmU1M%3d#/profile/7F77B0625BA343408823C8AAF2DA04E3";
+
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            Object.assign(link.style, {
+                display: "inline-block",
+                marginTop: "9px",
+                color: "#0a6ed1",
+                fontWeight: "600",
+                textDecoration: "none"
+            });
+
+            container.append(
+                text,
+                link
+            );
+
+            return container;
+        },
+
+        // -----------------------------------------------------
+        // ANTWORT 4
+        // -----------------------------------------------------
+
+        () => {
+            return (
+                "Tut mir leid, dazu liegen mir aktuell keine ausreichenden Informationen vor.\n\n" +
+                "Da müssen Sie Frau Kadjan fragen. 🙂"
+            );
+        }
+    ];
 
     // =========================================================
     // EINGABEBEREICH
@@ -201,6 +292,7 @@ javascript:(() => {
         document.createElement("input");
 
     input.type = "text";
+
     input.placeholder =
         "Nachricht eingeben...";
 
@@ -236,33 +328,57 @@ javascript:(() => {
 
         const typing =
             addMessage(
-                "schreibt ...",
+                "●  ●  ●",
                 "bot"
             );
 
-        typing.style.opacity = "0.65";
-        typing.style.fontStyle = "italic";
+        typing.style.opacity = "0.55";
 
-        // Kleine zufällige Verzögerung,
-        // damit es nach echtem Bot aussieht
+        // Etwas zufällige Verzögerung,
+        // damit die Antwort "berechnet" wirkt.
         const delay =
-            800 +
-            Math.random() * 900;
+            900 + Math.random() * 900;
 
         setTimeout(() => {
 
             typing.remove();
 
+            let response;
+
+            if (
+                responseIndex <
+                responses.length
+            ) {
+
+                response =
+                    responses[
+                        responseIndex
+                    ]();
+
+                responseIndex++;
+
+            } else {
+
+                // Wenn alle Demo-Antworten verbraucht sind
+                response =
+                    "Tut mir leid, dazu liegen mir aktuell keine ausreichenden Informationen vor.\n\n" +
+                    "Da müssen Sie Frau Kadjan fragen. 🙂";
+            }
+
             addMessage(
-                "Tut mir leid, das kann ich nicht beantworten. Da müssen Sie Frau Kadjan fragen.",
+                response,
                 "bot"
             );
+
+            input.disabled = false;
+            send.disabled = false;
+            input.focus();
 
         }, delay);
     }
 
     // =========================================================
-    // SENDEN
+    // NACHRICHT SENDEN
     // =========================================================
 
     function sendMessage() {
@@ -283,12 +399,6 @@ javascript:(() => {
         send.disabled = true;
 
         botReply();
-
-        setTimeout(() => {
-            input.disabled = false;
-            send.disabled = false;
-            input.focus();
-        }, 1800);
     }
 
     send.addEventListener(
