@@ -1,382 +1,328 @@
-(() => {
-    const ID = "sf-fokus-timer";
-    const POSITION_KEY = "sf-fokus-timer-position";
+javascript:(() => {
+    "use strict";
 
-    // Zweiter Klick auf die Kachel: Timer vollständig beenden
-    if (window.sfFocusTimer) {
-        clearInterval(window.sfFocusTimer.interval);
-        window.sfFocusTimer.root?.remove();
-        delete window.sfFocusTimer;
+    const ID = "sf-kadjan-bot";
+
+    // Zweiter Klick auf die Schnellaktion: Chat schließen
+    const existing = document.getElementById(ID);
+
+    if (existing) {
+        existing.remove();
         return;
     }
 
-    const DEFAULT_SECONDS = 25 * 60;
-
-    const state = {
-        remaining: DEFAULT_SECONDS,
-        running: false,
-        interval: null,
-        root: null
-    };
-
-    window.sfFocusTimer = state;
-
     // =========================================================
-    // PANEL
+    // CHAT-FENSTER
     // =========================================================
 
-    const panel = document.createElement("section");
-    panel.id = ID;
-    state.root = panel;
+    const chat = document.createElement("section");
+    chat.id = ID;
 
-    Object.assign(panel.style, {
+    Object.assign(chat.style, {
         position: "fixed",
         right: "24px",
-        top: "90px",
+        bottom: "24px",
+        width: "360px",
+        height: "500px",
         zIndex: "2147483647",
-        width: "270px",
-        padding: "16px",
-        textAlign: "center",
-        color: "#ffffff",
-        background: "linear-gradient(135deg, #0a6ed1, #354a5f)",
-        borderRadius: "14px",
-        boxShadow: "0 8px 28px rgba(0,0,0,.3)",
-        fontFamily: "Arial, sans-serif"
-    });
-
-    // =========================================================
-    // TITEL / DRAG-HANDLE
-    // =========================================================
-
-    const title = document.createElement("div");
-    title.textContent = "🎯 SF-Fokuszeit";
-
-    Object.assign(title.style, {
-        fontWeight: "bold",
-        fontSize: "17px",
-        cursor: "grab",
-        userSelect: "none",
-        touchAction: "none",
-        padding: "3px 0 6px 0"
-    });
-
-    // =========================================================
-    // TIMER
-    // =========================================================
-
-    const display = document.createElement("div");
-
-    Object.assign(display.style, {
-        margin: "14px 0",
-        fontSize: "42px",
-        fontWeight: "bold",
-        fontVariantNumeric: "tabular-nums"
-    });
-
-    const status = document.createElement("div");
-    status.textContent = "Bereit für die nächste Übung";
-    status.style.marginBottom = "12px";
-    status.style.fontSize = "13px";
-
-    // =========================================================
-    // BUTTONS
-    // =========================================================
-
-    const controls = document.createElement("div");
-
-    Object.assign(controls.style, {
         display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
-        gap: "7px"
+        flexDirection: "column",
+        overflow: "hidden",
+
+        background: "#ffffff",
+        color: "#1d2d3e",
+
+        borderRadius: "14px",
+        boxShadow: "0 10px 35px rgba(0,0,0,.28)",
+
+        fontFamily:
+            '"72", "Segoe UI", Arial, sans-serif'
     });
 
-    function makeButton(label) {
-        const button = document.createElement("button");
-        button.textContent = label;
+    // =========================================================
+    // HEADER
+    // =========================================================
 
-        Object.assign(button.style, {
-            padding: "7px 10px",
-            border: "none",
-            borderRadius: "6px",
-            background: "#ffffff",
-            color: "#0a4b78",
-            cursor: "pointer",
-            fontWeight: "bold"
+    const header = document.createElement("div");
+
+    Object.assign(header.style, {
+        padding: "14px 16px",
+        background:
+            "linear-gradient(135deg, #0a6ed1, #0854a0)",
+        color: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between"
+    });
+
+    const headerLeft = document.createElement("div");
+
+    const botName = document.createElement("div");
+    botName.textContent = "🤖 SF Assistant";
+
+    Object.assign(botName.style, {
+        fontSize: "16px",
+        fontWeight: "700"
+    });
+
+    const botStatus = document.createElement("div");
+    botStatus.textContent = "● Online";
+
+    Object.assign(botStatus.style, {
+        marginTop: "3px",
+        fontSize: "11px",
+        opacity: "0.85"
+    });
+
+    headerLeft.append(
+        botName,
+        botStatus
+    );
+
+    const close = document.createElement("button");
+    close.textContent = "✕";
+
+    Object.assign(close.style, {
+        border: "none",
+        background: "transparent",
+        color: "#ffffff",
+        fontSize: "18px",
+        cursor: "pointer"
+    });
+
+    close.addEventListener("click", () => {
+        chat.remove();
+    });
+
+    header.append(
+        headerLeft,
+        close
+    );
+
+    // =========================================================
+    // NACHRICHTEN
+    // =========================================================
+
+    const messages = document.createElement("div");
+
+    Object.assign(messages.style, {
+        flex: "1",
+        padding: "16px",
+        overflowY: "auto",
+        background: "#f7f8f9",
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px"
+    });
+
+    // =========================================================
+    // NACHRICHT ERSTELLEN
+    // =========================================================
+
+    function addMessage(text, sender) {
+
+        const wrapper =
+            document.createElement("div");
+
+        Object.assign(wrapper.style, {
+            display: "flex",
+            justifyContent:
+                sender === "user"
+                    ? "flex-end"
+                    : "flex-start"
         });
 
-        return button;
+        const bubble =
+            document.createElement("div");
+
+        bubble.textContent = text;
+
+        Object.assign(bubble.style, {
+            maxWidth: "78%",
+            padding: "9px 12px",
+            borderRadius:
+                sender === "user"
+                    ? "14px 14px 3px 14px"
+                    : "14px 14px 14px 3px",
+
+            background:
+                sender === "user"
+                    ? "#0a6ed1"
+                    : "#ffffff",
+
+            color:
+                sender === "user"
+                    ? "#ffffff"
+                    : "#1d2d3e",
+
+            boxShadow:
+                sender === "user"
+                    ? "none"
+                    : "0 1px 4px rgba(0,0,0,.12)",
+
+            fontSize: "14px",
+            lineHeight: "1.4"
+        });
+
+        wrapper.appendChild(bubble);
+        messages.appendChild(wrapper);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+        return wrapper;
     }
 
-    const startButton = makeButton("Start");
-    const addButton = makeButton("+5 Min.");
-    const resetButton = makeButton("Reset");
-    const closeButton = makeButton("Schließen");
-
     // =========================================================
-    // RENDERING
+    // BEGRÜSSUNG
     // =========================================================
 
-    function render() {
-        const minutes = Math.floor(state.remaining / 60);
-        const seconds = state.remaining % 60;
-
-        display.textContent =
-            `${String(minutes).padStart(2, "0")}:` +
-            `${String(seconds).padStart(2, "0")}`;
-
-        startButton.textContent = state.running ? "Pause" : "Start";
-    }
-
-    function stopInterval() {
-        clearInterval(state.interval);
-        state.interval = null;
-        state.running = false;
-    }
-
-    // =========================================================
-    // START / PAUSE
-    // =========================================================
-
-    startButton.addEventListener("click", () => {
-
-        if (state.running) {
-            stopInterval();
-            status.textContent = "Pausiert";
-            render();
-            return;
-        }
-
-        state.running = true;
-        status.textContent = "Konzentriert arbeiten";
-        render();
-
-        state.interval = setInterval(() => {
-
-            state.remaining--;
-
-            if (state.remaining <= 0) {
-
-                state.remaining = 0;
-
-                stopInterval();
-
-                status.textContent = "✅ Fokuszeit beendet";
-
-                panel.style.background =
-                    "linear-gradient(135deg, #107e3e, #256f3a)";
-            }
-
-            render();
-
-        }, 1000);
-    });
-
-    // =========================================================
-    // +5 MINUTEN
-    // =========================================================
-
-    addButton.addEventListener("click", () => {
-        state.remaining += 5 * 60;
-        status.textContent = "Fünf Minuten hinzugefügt";
-        render();
-    });
-
-    // =========================================================
-    // RESET
-    // =========================================================
-
-    resetButton.addEventListener("click", () => {
-
-        stopInterval();
-
-        state.remaining = DEFAULT_SECONDS;
-
-        status.textContent =
-            "Bereit für die nächste Übung";
-
-        panel.style.background =
-            "linear-gradient(135deg, #0a6ed1, #354a5f)";
-
-        render();
-    });
-
-    // =========================================================
-    // SCHLIESSEN
-    // =========================================================
-
-    closeButton.addEventListener("click", () => {
-
-        stopInterval();
-
-        panel.remove();
-
-        delete window.sfFocusTimer;
-    });
-
-    // =========================================================
-    // DRAG & DROP
-    // =========================================================
-
-    let dragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-
-    title.addEventListener("pointerdown", (event) => {
-
-        if (event.button !== 0) return;
-
-        dragging = true;
-
-        const rect = panel.getBoundingClientRect();
-
-        offsetX = event.clientX - rect.left;
-        offsetY = event.clientY - rect.top;
-
-        // Wechsel von right auf left, damit das Panel
-        // frei positioniert werden kann.
-        panel.style.left = `${rect.left}px`;
-        panel.style.top = `${rect.top}px`;
-        panel.style.right = "auto";
-
-        title.style.cursor = "grabbing";
-
-        title.setPointerCapture(event.pointerId);
-
-        event.preventDefault();
-    });
-
-    title.addEventListener("pointermove", (event) => {
-
-        if (!dragging) return;
-
-        const panelWidth = panel.offsetWidth;
-        const panelHeight = panel.offsetHeight;
-
-        let newLeft = event.clientX - offsetX;
-        let newTop = event.clientY - offsetY;
-
-        // Panel innerhalb des sichtbaren Browserfensters halten
-        newLeft = Math.max(
-            0,
-            Math.min(
-                newLeft,
-                window.innerWidth - panelWidth
-            )
-        );
-
-        newTop = Math.max(
-            0,
-            Math.min(
-                newTop,
-                window.innerHeight - panelHeight
-            )
-        );
-
-        panel.style.left = `${newLeft}px`;
-        panel.style.top = `${newTop}px`;
-    });
-
-    title.addEventListener("pointerup", (event) => {
-
-        if (!dragging) return;
-
-        dragging = false;
-
-        title.style.cursor = "grab";
-
-        if (title.hasPointerCapture(event.pointerId)) {
-            title.releasePointerCapture(event.pointerId);
-        }
-
-        const rect = panel.getBoundingClientRect();
-
-        // Position speichern
-        localStorage.setItem(
-            POSITION_KEY,
-            JSON.stringify({
-                left: rect.left,
-                top: rect.top
-            })
-        );
-    });
-
-    title.addEventListener("pointercancel", () => {
-        dragging = false;
-        title.style.cursor = "grab";
-    });
-
-    // =========================================================
-    // ELEMENTE EINFÜGEN
-    // =========================================================
-
-    controls.append(
-        startButton,
-        addButton,
-        resetButton,
-        closeButton
+    addMessage(
+        "Hallo! 👋 Ich bin Ihr virtueller SF Assistant. Wie kann ich Ihnen helfen?",
+        "bot"
     );
 
-    panel.append(
-        title,
-        display,
-        status,
-        controls
-    );
-
-    document.body.appendChild(panel);
-
     // =========================================================
-    // GESPEICHERTE POSITION WIEDERHERSTELLEN
+    // EINGABEBEREICH
     // =========================================================
 
-    try {
+    const inputArea =
+        document.createElement("div");
 
-        const savedPosition =
-            JSON.parse(
-                localStorage.getItem(POSITION_KEY)
+    Object.assign(inputArea.style, {
+        padding: "12px",
+        display: "flex",
+        gap: "8px",
+        borderTop: "1px solid #d9d9d9",
+        background: "#ffffff"
+    });
+
+    const input =
+        document.createElement("input");
+
+    input.type = "text";
+    input.placeholder =
+        "Nachricht eingeben...";
+
+    Object.assign(input.style, {
+        flex: "1",
+        padding: "9px 11px",
+        border: "1px solid #89919a",
+        borderRadius: "7px",
+        outline: "none",
+        fontSize: "14px"
+    });
+
+    const send =
+        document.createElement("button");
+
+    send.textContent = "➤";
+
+    Object.assign(send.style, {
+        width: "42px",
+        border: "none",
+        borderRadius: "7px",
+        background: "#0a6ed1",
+        color: "#ffffff",
+        cursor: "pointer",
+        fontSize: "18px"
+    });
+
+    // =========================================================
+    // BOT-ANTWORT
+    // =========================================================
+
+    function botReply() {
+
+        const typing =
+            addMessage(
+                "schreibt ...",
+                "bot"
             );
 
-        if (
-            savedPosition &&
-            Number.isFinite(savedPosition.left) &&
-            Number.isFinite(savedPosition.top)
-        ) {
+        typing.style.opacity = "0.65";
+        typing.style.fontStyle = "italic";
 
-            const maxLeft =
-                window.innerWidth - panel.offsetWidth;
+        // Kleine zufällige Verzögerung,
+        // damit es nach echtem Bot aussieht
+        const delay =
+            800 +
+            Math.random() * 900;
 
-            const maxTop =
-                window.innerHeight - panel.offsetHeight;
+        setTimeout(() => {
 
-            panel.style.left =
-                `${Math.max(
-                    0,
-                    Math.min(
-                        savedPosition.left,
-                        maxLeft
-                    )
-                )}px`;
+            typing.remove();
 
-            panel.style.top =
-                `${Math.max(
-                    0,
-                    Math.min(
-                        savedPosition.top,
-                        maxTop
-                    )
-                )}px`;
+            addMessage(
+                "Tut mir leid, das kann ich nicht beantworten. Da müssen Sie Frau Kadjan fragen.",
+                "bot"
+            );
 
-            panel.style.right = "auto";
-        }
-
-    } catch (error) {
-        console.warn(
-            "Gespeicherte Fokus-Timer-Position konnte nicht geladen werden.",
-            error
-        );
+        }, delay);
     }
 
-    render();
+    // =========================================================
+    // SENDEN
+    // =========================================================
+
+    function sendMessage() {
+
+        const text =
+            input.value.trim();
+
+        if (!text) return;
+
+        addMessage(
+            text,
+            "user"
+        );
+
+        input.value = "";
+
+        input.disabled = true;
+        send.disabled = true;
+
+        botReply();
+
+        setTimeout(() => {
+            input.disabled = false;
+            send.disabled = false;
+            input.focus();
+        }, 1800);
+    }
+
+    send.addEventListener(
+        "click",
+        sendMessage
+    );
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    );
+
+    // =========================================================
+    // CHAT ZUSAMMENBAUEN
+    // =========================================================
+
+    inputArea.append(
+        input,
+        send
+    );
+
+    chat.append(
+        header,
+        messages,
+        inputArea
+    );
+
+    document.body.appendChild(chat);
+
+    input.focus();
 
 })();
